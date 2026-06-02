@@ -11,7 +11,7 @@
 ├── 10.1 多模态基础（定义、为什么重要）
 ├── 10.2 CLIP 模型（对比学习、图文对齐）
 ├── 10.3 Vision-Language 模型（GPT-4o / Claude / Qwen-VL / Gemini）
-├── 10.4 多模态 RAG（跨模态检索、Sentence Transformers v5.4）
+├── 10.4 多模态 RAG（跨模态检索、Sentence Transformers 统一 API）
 ├── 10.5 视频理解 Agent
 ├── 10.6 GUI Agent / Computer Use
 ├── 10.7 多模态应用实战（OCR/图表分析/文档理解）
@@ -326,15 +326,15 @@ print(processor.decode(output[0], skip_special_tokens=True))
 | **多模态嵌入（Unified Embedding）** | 用统一的多模态 embedding 模型编码所有模态 | 保留原始视觉信息，跨模态检索 | 需要多模态 embedding 模型 |
 | **ColPali / Late Interaction** | 直接对 PDF 页面截图生成多向量，用 MaxSim 检索 | 跳过 OCR/解析，端到端 | 索引体积大，计算成本高 |
 
-**Sentence Transformers v5.4 统一 API：**
+**Sentence Transformers 统一 API：**
 
-Sentence Transformers v5.4 提供了统一的多模态嵌入接口，支持文本、图像混合编码：
+Sentence Transformers（v3.x+）提供了统一的多模态嵌入接口，支持文本、图像混合编码：
 
 ```python
 from sentence_transformers import SentenceTransformer
 from PIL import Image
 
-# v5.4 统一 API：文本和图像用同一个模型编码
+# 统一 API：文本和图像用同一个模型编码
 model = SentenceTransformer("jinaai/jina-clip-v2")
 
 # 文本嵌入
@@ -407,7 +407,7 @@ top_pages = scores.argsort(descending=True)[:5]
 
 **面试话术：**
 
-> "多模态 RAG 的核心挑战是跨模态检索。有三种主流策略：第一种是 text-first，把图片转文字后走传统 RAG，简单但信息损失大；第二种用统一的多模态 embedding（如 Jina-CLIP-v2）编码所有模态到同一空间，Sentence Transformers v5.4 提供了开箱即用的统一 API；第三种是 ColPali 的端到端方案，直接对 PDF 页面截图生成 patch-level 多向量，用 MaxSim 做 late interaction 检索，跳过了复杂的文档解析。实际项目中我会根据文档类型选择：纯文本为主用第一种，图表密集用第三种。"
+> "多模态 RAG 的核心挑战是跨模态检索。有三种主流策略：第一种是 text-first，把图片转文字后走传统 RAG，简单但信息损失大；第二种用统一的多模态 embedding（如 Jina-CLIP-v2）编码所有模态到同一空间，Sentence Transformers（v3.x+）提供了开箱即用的统一 API；第三种是 ColPali 的端到端方案，直接对 PDF 页面截图生成 patch-level 多向量，用 MaxSim 做 late interaction 检索，跳过了复杂的文档解析。实际项目中我会根据文档类型选择：纯文本为主用第一种，图表密集用第三种。"
 
 ---
 

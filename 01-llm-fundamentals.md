@@ -8,6 +8,7 @@
 
 ```
 LLM 基础
+├── 1.0 深度学习 / 神经网络 / Transformer / LLM 的关系
 ├── 1.1 什么是 LLM
 ├── 1.2 Token 与 Tokenizer
 ├── 1.3 生成参数（Temperature / Top-P / Top-K）
@@ -18,6 +19,30 @@ LLM 基础
 ├── 1.8 LLM API 调用基础
 └── 1.9 灾难性遗忘（Catastrophic Forgetting）
 ```
+
+---
+
+## 1.0 深度学习 / 神经网络 / Transformer / LLM 的关系
+
+### Q: 这些概念是什么关系？我经常搞混。
+
+从大到小的包含关系：
+
+```
+机器学习（Machine Learning）
+└── 深度学习（Deep Learning）
+    └── 神经网络（Neural Network）  ← 深度学习的实现方式
+        └── Transformer             ← 一种特定的神经网络架构
+            └── LLM 大模型          ← 用 Transformer 架构训练出的具体产物
+```
+
+- **机器学习** — 让机器从数据中学习规律的方法论总称。决策树、SVM、神经网络都属于它。
+- **深度学习** — 机器学习的子集，专指用多层神经网络来学习。"深"指层数多（几十层到几百层）。
+- **神经网络** — 深度学习的具体实现结构，模仿人脑神经元连接方式。有多种：CNN（图像）、RNN（序列）、Transformer（语言）等。
+- **Transformer** — 2017 年提出的一种神经网络架构，核心是 Attention 机制，解决了 RNN 不能并行、长距离依赖弱的问题。
+- **LLM** — 用 Transformer 架构，在海量文本上训练出来的具体模型。GPT-4、Claude、LLaMA 都是 LLM。"大"指参数量大（几十亿到几千亿）。
+
+**一句话：LLM 是一个用 Transformer 架构搭建、用深度学习方法训练的超大神经网络。**
 
 ---
 
@@ -73,6 +98,22 @@ LLM 基础
 | 中文 | 1 个汉字 ≈ 1-2 个 tokens |
 
 **为什么用 Token 而不是字/词？**
+
+三种切法的对比：
+
+```
+按字符切：
+  "unhappiness" → u/n/h/a/p/p/i/n/e/s/s  → 11个
+  词汇表小，但序列太长，计算量爆炸
+
+按完整词切：
+  "unhappiness" → unhappiness  → 1个
+  序列短，但词汇表巨大（百万级），遇到新词/错别字就不认识
+
+按子词切（Token，实际做法）：
+  "unhappiness" → un/happiness  → 2个
+  折中：词汇表可控（3-10万），又能拼出没见过的词
+```
 
 1. **子词切分（Subword Tokenization）** 兼顾了词汇表大小和覆盖度：
    - 按字符切：词汇表小但序列太长
@@ -165,8 +206,9 @@ Top-K = 2：
 | 模型 | Context Window | 说明 |
 |------|---------------|------|
 | GPT-4o | 128K | OpenAI 主力 |
-| Claude 4 Sonnet/Opus | 200K / 1M | Anthropic，长文本强 |
-| Gemini 2.0 | 1M ~ 2M | Google，超长上下文 |
+| Claude 4 Sonnet | 200K | Anthropic，性价比高 |
+| Claude 4 Opus | 1M | Anthropic，长文本强 |
+| Gemini 2.5 Pro | 1M（实验版 2M） | Google，超长上下文 |
 | DeepSeek-V3 | 128K | 开源，性价比高 |
 | Qwen3 | 128K | 阿里，中文强 |
 
@@ -208,7 +250,7 @@ Top-K = 2：
 
 1. **Scaling Law：** 参数量足够大 + 训练数据足够多 → 模型学到了语言的深层结构和世界知识
 2. **In-context Learning：** 模型能从 prompt 中的示例"临时学习"，不需要更新参数
-3. **涌现能力：** 当模型达到一定规模（约 100B+ 参数），突然出现推理、代码生成等训练时没有显式教过的能力
+3. **涌现能力：** 当模型达到一定规模，出现推理、代码生成等训练时没有显式教过的能力（学界对"突然涌现"的现象有争议，部分研究认为与评估指标的非线性有关，但实践中大模型确实比小模型有质的差异）
 
 **自回归 vs 非自回归：**
 
@@ -241,7 +283,7 @@ Top-K = 2：
 
 | 模型 | 参数量 | 核心优势 |
 |------|--------|----------|
-| LLaMA 4 | 8B/70B/405B | Meta 出品，社区活跃 |
+| LLaMA 4 | Scout 17B/109B、Maverick 400B（MoE） | Meta 出品，社区活跃 |
 | DeepSeek-V3/R1 | 671B（MoE） | 推理能力极强，性价比高 |
 | Qwen3 | 0.6B ~ 235B | 中文最佳开源 |
 | Mistral Large | 123B | 欧洲出品，多语言 |

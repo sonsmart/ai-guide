@@ -225,7 +225,7 @@ $ claude
 | 底层模型 | 自研 + 闭源模型 | 可插拔（Claude / GPT-4o 等） |
 | 执行环境 | 自带 VM + 浏览器 | Docker sandbox |
 | 交互模式 | Web UI，异步任务 | Web UI / CLI |
-| SWE-bench 表现 | ~49%（Lite）| ~53%（Lite, with Claude） |
+| SWE-bench 表现 | ~49%（Lite，持续更新，以官网为准）| ~53%（Lite, with Claude，持续更新） |
 | 定价 | $500+/月 | 免费（自付 API 费用） |
 | 适合 | 企业级项目、非技术 PM 使用 | 开发者自己使用、可定制 |
 

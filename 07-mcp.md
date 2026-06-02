@@ -109,8 +109,8 @@ MCP 出现之后（标准化时代）：
 | Transport 类型 | 协议 | 适用场景 | 前端类比 |
 |---------------|------|---------|---------|
 | **stdio** | 标准输入/输出 | 本地进程，CLI 工具 | `child_process.spawn()` |
-| **SSE (HTTP+SSE)** | Server-Sent Events | 远程服务，需要流式 | `EventSource` API |
-| **Streamable HTTP** | HTTP POST + 可选流 | 2025+ 推荐的远程方式 | `fetch` + `ReadableStream` |
+| **SSE (HTTP+SSE)** | Server-Sent Events | 远程服务（已弃用，legacy） | `EventSource` API |
+| **Streamable HTTP** | HTTP POST + 可选流 | 2025+ 推荐的远程方式，取代 SSE | `fetch` + `ReadableStream` |
 
 **MCP Server 的四大能力（Capabilities）：**
 

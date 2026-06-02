@@ -502,7 +502,7 @@ npx promptfoo@latest redteam report  # 生成报告
 | 9 | **Overreliance** | 过度依赖 AI 输出不加验证 | 人工审核 + 置信度标注 |
 | 10 | **Model Theft** | 模型被窃取或逆向 | API 限流 + 水印 |
 
-**OWASP Agent Top 10（2026）— Agent 特有的新威胁：**
+**Agent 特有的新威胁（基于 OWASP LLM Top 10 延伸，非 OWASP 正式发布文档）：**
 
 | 风险 | 与 LLM Top 10 的区别 |
 |------|---------------------|

@@ -25,7 +25,7 @@ AI Agent
 │   ├── 情景记忆（Episodic Memory）
 │   └── 记忆框架（Mem0 / Zep / Letta）
 ├── 6.7 Multi-Agent 系统
-│   ├── AutoGen v3
+│   ├── AutoGen 0.4+
 │   ├── CrewAI
 │   ├── A2A（Agent-to-Agent）协议
 │   └── 协作模式（层级/扁平/竞争）
@@ -109,6 +109,10 @@ AI Agent（有状态、主动）：
 ### Q: 什么是 ReAct？请解释 Thought → Action → Observation 循环。
 
 **ReAct = Reasoning + Acting，是 Agent 最经典的执行模式。核心思想是让 LLM 交替进行"推理思考"和"采取行动"，而不是一步到位。**
+
+**ReAct 和 Thought → Action → Observation 是什么关系？**
+
+两者是同一个东西——ReAct 是这个模式的名字（来自论文标题），Thought → Action → Observation 是它每一轮循环的具体三个步骤。普通 LLM 调用是一次性的"输入 → 输出"，ReAct 让模型每次只走一小步，看到工具返回的结果再决定下一步，能根据中间结果动态调整策略。
 
 ```
 ReAct 循环：
@@ -823,9 +827,9 @@ Multi-Agent 协作模式：
                         └──────────┘
 ```
 
-**AutoGen v3 vs CrewAI 对比：**
+**AutoGen vs CrewAI 对比：**
 
-| 维度 | AutoGen v3 (Microsoft) | CrewAI |
+| 维度 | AutoGen 0.4+ (Microsoft) | CrewAI |
 |------|----------------------|--------|
 | **架构理念** | Event-driven, Actor 模型 | Role-based, 顺序/并行流程 |
 | **核心抽象** | Agent + Team + Termination | Agent + Task + Crew + Process |

@@ -118,9 +118,9 @@ class TaskComplexity(Enum):
 
 # 模型路由表
 MODEL_ROUTER = {
-    TaskComplexity.SIMPLE:  {"model": "gpt-4o-mini",  "cost_per_1k": 0.15},   # $0.15/1K
-    TaskComplexity.MEDIUM:  {"model": "gpt-4o",       "cost_per_1k": 2.50},   # $2.50/1K
-    TaskComplexity.COMPLEX: {"model": "claude-sonnet", "cost_per_1k": 3.00},   # $3.00/1K
+    TaskComplexity.SIMPLE:  {"model": "gpt-4o-mini",  "cost_per_1k": 0.15},   # 定价以官网为准，随时变化
+    TaskComplexity.MEDIUM:  {"model": "gpt-4o",       "cost_per_1k": 2.50},   # 定价以官网为准，随时变化
+    TaskComplexity.COMPLEX: {"model": "claude-sonnet", "cost_per_1k": 3.00},   # 定价以官网为准，随时变化
 }
 
 async def classify_complexity(query: str) -> TaskComplexity:

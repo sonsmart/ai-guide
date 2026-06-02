@@ -161,16 +161,21 @@ KV Cache 内存 = 2 × n_layers × n_heads × head_dim × seq_len × batch_size 
   sizeof:   FP16=2 bytes, FP8=1 byte
 
 示例计算 — LLaMA-3.1-70B (单请求):
-  L = 80, d_model = 8192, S = 4096, B = 1, FP16
+  L = 80, S = 4096, B = 1, FP16
+  注意：LLaMA-3.1-70B 使用 GQA，有 64 个 Q heads 但只有 8 个 KV heads
+  head_dim = 128, KV heads = 8
 
-  KV Cache = 2 × 80 × 8192 × 4096 × 1 × 2 bytes
-           = 2 × 80 × 8192 × 4096 × 2
-           = 10,737,418,240 bytes
-           ≈ 10 GB  😱
+  KV Cache = 2 × L × (n_kv_heads × head_dim) × S × B × sizeof(dtype)
+           = 2 × 80 × (8 × 128) × 4096 × 1 × 2 bytes
+           = 2 × 80 × 1024 × 4096 × 2
+           = 1,342,177,280 bytes
+           ≈ 1.25 GB
+
+  （若错误地按完整 d_model=8192 的 MHA 计算，会得到 ~10 GB，偏高约 8 倍）
 
   模型权重本身 (FP16): 70B × 2 = 140 GB
-  一个请求的 KV Cache: ~10 GB
-  10 个并发请求: ~100 GB（比很多模型还大！）
+  一个请求的 KV Cache: ~1.25 GB
+  10 个并发请求: ~12.5 GB
 ```
 
 **KV Cache 是推理显存的主要瓶颈：**
@@ -178,7 +183,7 @@ KV Cache 内存 = 2 × n_layers × n_heads × head_dim × seq_len × batch_size 
 | 模型 | 权重 (FP16) | KV Cache (seq=4K, B=1) | 10 并发 KV |
 |------|-----------|----------------------|-----------|
 | LLaMA-3.1-8B | 16 GB | ~1.0 GB | ~10 GB |
-| LLaMA-3.1-70B | 140 GB | ~10 GB | ~100 GB |
+| LLaMA-3.1-70B | 140 GB | ~1.25 GB（GQA） | ~12.5 GB |
 | LLaMA-3.1-405B | 810 GB | ~64 GB | ~640 GB |
 
 **优化 KV Cache 的方法：**
@@ -200,6 +205,67 @@ KV Cache 优化方法
 ```
 
 **前端类比：** KV Cache 就是浏览器的 HTTP 缓存。第一次请求页面时加载所有资源（Prefill），后续请求只获取增量更新（Decode），已缓存的资源不重复下载。但缓存太大会撑爆内存（KV Cache OOM），所以需要缓存淘汰策略（LRU / PagedAttention）。
+
+### Q: KV Cache 只在推理时用，训练时也用吗？
+
+**KV Cache 只用于推理，训练时不用。**
+
+训练时需要对整个序列并行计算完整的 Attention 矩阵，还需要保留中间结果用于反向传播计算梯度，无法跳过任何 token 的计算。推理时是自回归逐步生成，天然存在"历史已算过"的重复计算，KV Cache 才有意义。
+
+### Q: 推理时 Prefill 和 Decode 阶段具体发生了什么？
+
+以输入 "苹果是什么颜色"，模型回答 "是红色" 为例：
+
+```
+Prefill 阶段（一次性，并行）：
+  "苹果""是""什么""颜色" → embedding → 各自的 Q/K/V
+  → 经过多层 Transformer（每层做 Attention + FFN）
+  → 把所有 token 每一层的 K/V 全部存入 KV Cache
+  → 取"颜色"最后一层的新表示向量 × 词表矩阵
+  → 得到词表里每个词的概率分布 → 采样 → 输出"是"
+
+Decode 第一步：
+  "是" → embedding → Q/K/V
+  → 用"是"的 Q 去 attend KV Cache 里所有历史 K/V（每一层）
+  → 经过多层 Transformer
+  → 把"是"的 K/V 追加进 Cache
+  → 输出"红"
+
+Decode 第二步：
+  "红" → 同上，Cache 现在包含"苹果""是""什么""颜色""是"的 K/V
+  → 输出"色"
+
+Decode 第三步：
+  → 输出终止符，停止
+```
+
+**关键点：** "是红色"不是一次性生成的，是逐 token 预测出来的。每步只需计算新 token 自己的 Q/K/V，历史 token 的 K/V 从 Cache 里直接取，不重复计算。
+
+### Q: 每一层 Transformer 里 Attention + FFN 具体做什么？每层的 K/V 都不一样吗？
+
+**每一层做两件事：**
+
+```
+Attention：
+  当前层每个 token 的表示向量 → 各自生成 Q/K/V
+  → 每个 token 的 Q 去 attend 所有 token 的 K/V → 加权累加得到新向量
+
+FFN：
+  把 Attention 输出的向量再过一个全连接网络
+  → 得到这一层最终的新表示向量，作为下一层的输入
+```
+
+**每一层的 K/V 完全不同。** 每层有自己独立的 W_Q、W_K、W_V 权重矩阵，同一个 token 在不同层算出来的 Q/K/V 值不同。KV Cache 存的是**每一层**的 K/V：
+
+```
+KV Cache 结构：
+  第 1 层：[token1的K, token2的K, ...] / [token1的V, token2的V, ...]
+  第 2 层：[token1的K, token2的K, ...] / [token1的V, token2的V, ...]
+  ...
+  第 80 层（LLaMA-70B）：同上
+```
+
+这也是公式里有 n_layers 这一项的原因——每层都要存一份 K/V。
 
 > **面试话术：** "KV Cache 是 Transformer 推理的核心优化，通过缓存历史 token 的 Key-Value 避免重复计算，把时间复杂度从 O(n^2) 降到 O(n)。但代价是显存占用，一个 70B 模型在 4K 序列长度下单请求 KV Cache 就有约 10GB。在高并发场景下 KV Cache 往往比模型权重占更多显存，所以 GQA、PagedAttention、KV 量化等优化至关重要。"
 
