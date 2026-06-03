@@ -112,14 +112,13 @@ MCP 出现之后（标准化时代）：
 | **SSE (HTTP+SSE)** | Server-Sent Events | 远程服务（已弃用，legacy） | `EventSource` API |
 | **Streamable HTTP** | HTTP POST + 可选流 | 2025+ 推荐的远程方式，取代 SSE | `fetch` + `ReadableStream` |
 
-**MCP Server 的四大能力（Capabilities）：**
+**MCP Server 暴露三大核心能力（Capabilities）：**
 
 ```
 MCP Server 能力
 ├── Tools（工具）       ← 模型可以调用的函数（如：搜索文件、发送邮件）
 ├── Resources（资源）   ← 模型可以读取的数据（如：文件内容、数据库记录）
-├── Prompts（提示词）   ← 预定义的 Prompt 模板（如：代码审查模板）
-└── Sampling（采样）    ← Server 反向请求 Client 让 LLM 生成内容
+└── Prompts（提示词）   ← 预定义的 Prompt 模板（如：代码审查模板）
 ```
 
 | 能力 | 方向 | 描述 | 前端类比 |
@@ -127,7 +126,8 @@ MCP Server 能力
 | **Tools** | Client → Server | "帮我执行这个操作" | POST 请求 |
 | **Resources** | Client → Server | "给我这份数据" | GET 请求 |
 | **Prompts** | Client → Server | "给我这个模板" | 静态资源请求 |
-| **Sampling** | Server → Client | "帮我调用 LLM 生成" | WebSocket 反向推送 |
+
+**Sampling 是 Client primitive（客户端原语）**，不属于 Server 能力。Sampling 允许 Server 向 Client 发起请求，由 Client 调用 LLM 生成内容并将结果返回给 Server。通信方向与上表相反：Server → Client → LLM → Client → Server。
 
 **消息通信基于 JSON-RPC 2.0：**
 
@@ -161,7 +161,7 @@ MCP Server 能力
 }
 ```
 
-> **面试话术：** "MCP 是三层架构——Client 嵌入在 Host 应用中负责发起请求，Server 暴露 Tools/Resources/Prompts/Sampling 四大能力，Transport 层支持 stdio、SSE 和 Streamable HTTP 三种传输方式。消息格式基于 JSON-RPC 2.0。整个设计思路和 Web 前后端分离很像：Transport 层 ≈ HTTP 协议，Server ≈ REST API，Client ≈ 浏览器的 fetch。"
+> **面试话术：** "MCP 是三层架构——Client 嵌入在 Host 应用中负责发起请求，Server 暴露 Tools/Resources/Prompts 三大核心能力，Transport 层支持 stdio、SSE 和 Streamable HTTP 三种传输方式。消息格式基于 JSON-RPC 2.0。Sampling 是 Client primitive，允许 Server 反向请求 Client 调用 LLM 生成内容，不属于 Server 能力。整个设计思路和 Web 前后端分离很像：Transport 层 ≈ HTTP 协议，Server ≈ REST API，Client ≈ 浏览器的 fetch。"
 
 ---
 
@@ -662,7 +662,7 @@ MCP 生态版图（2026）
   │  Cursor          ✅  (主力 IDE)              │
   │  VS Code (Copilot) ✅  (2025 加入)          │
   │  Windsurf        ✅                          │
-  │  OpenAI ChatGPT  ✅  (2025.03 宣布支持)      │
+  │  OpenAI          ✅  (2025.03 宣布 API 支持，ChatGPT 应用 2025.09 上线)  │
   │  Google Gemini   ✅  (2025 加入)             │
   └─────────────────────────────────────────────┘
 
@@ -738,7 +738,8 @@ Agent 框架将 MCP 作为默认的工具接入方式，开发者不再需要手
 | 2024.11 初版 | stdio + SSE，基础 Tools/Resources |
 | 2025.03 | Streamable HTTP 取代 SSE 成为推荐远程传输 |
 | 2025.06 | OAuth 2.0 认证标准化，Tool Annotations（权限标注） |
-| 2025-2026 | 工具组合（Composition）、多 Server 编排、Elicitation（Server 向用户提问） |
+| 2025-2026 | 工具组合（Composition）、多 Server 编排、Elicitation（Server 向用户提问）—— 已实现（正式规范） |
+| 2026.06 | Sampling、Roots、Logging 被标记为 deprecated |
 
 **对前端开发者的机会：**
 
@@ -786,7 +787,7 @@ MCP 核心知识 Checklist：
 
 ✅ MCP = Anthropic 开源的 AI-工具标准化协议（"AI 世界的 USB"）
 ✅ 架构三层：Client（嵌入 Host）、Server（暴露能力）、Transport（stdio/SSE/HTTP）
-✅ Server 四大能力：Tools、Resources、Prompts、Sampling
+✅ Server 三大核心能力：Tools、Resources、Prompts；Sampling 是 Client primitive（Server 反向请求 Client 调用 LLM）
 ✅ vs Function Calling：MCP 是跨平台标准，FC 是厂商专属；MCP 自动发现+执行，FC 需手动编排
 ✅ 开发模式：Decorator 注册 → 自动生成 Schema → stdio/HTTP 启动
 ✅ 安全五层：权限模型 + OAuth 2.0 + 输入校验 + 速率限制 + 审计日志

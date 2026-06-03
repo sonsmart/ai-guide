@@ -95,7 +95,7 @@
         ╱ $0 ╲    命中缓存 → 不调 LLM → 成本为 0
        ╱──────╲
       ╱        ╲   模型路由
-     ╱  $0.15   ╲  简单问题 → 小模型（成本 1/30）
+     ╱  $0.15   ╲  简单问题 → 小模型（成本约 1/16）
     ╱────────────╲
    ╱              ╲  Prompt 压缩
   ╱    $0.50       ╲ 压缩 Token 数量 → 减少 30-50%
@@ -200,7 +200,7 @@ class SemanticCache:
 
 | 方法 | 描述 | Token 节省 |
 |------|------|-----------|
-| **LLMLingua** | 微软的 Prompt 压缩工具，去掉冗余 Token | 30-50% |
+| **LLMLingua** | 微软的 Prompt 压缩工具，去掉冗余 Token | 20-80%（激进可达95%+，视质量容忍度而定） |
 | **摘要代替全文** | 先让小模型摘要，再把摘要给大模型 | 50-70% |
 | **动态 Context** | 只送最相关的 Top-3 而不是 Top-10 | 60% |
 | **System Prompt 缓存** | OpenAI Prompt Caching（相同前缀缓存） | 50%（缓存命中时） |
@@ -1020,8 +1020,8 @@ def test_rag_quality():
 | 提供商 | 功能 | 折扣 | 最小缓存长度 |
 |--------|------|------|-------------|
 | Anthropic | 自动缓存 | 输入价格 90% 折扣 | 1024 tokens |
-| OpenAI | 自动（GPT-4o） | 输入价格 50% 折扣 | 1024 tokens |
-| Google | Context Caching | 按缓存存储时间计费 | 32K tokens |
+| OpenAI | 自动（GPT-4o） | 输入价格 90% 折扣 | 1024 tokens |
+| Google | Context Caching | 按缓存存储时间计费 | 2,048-4,096 tokens（因模型而异，以官网为准） |
 
 **使用建议：**
 - System Prompt 超过 1024 tokens → 自动获益

@@ -222,7 +222,7 @@ CLIP (2021)
 | **GPT-4o** | End-to-End 原生 | 内置 | Any-to-Any，原生多模态 token |
 | **Claude Sonnet/Opus** | Cross-Attention | 内置 ViT | 强文档/图表理解，支持 Computer Use |
 | **Gemini 2.5** | End-to-End 原生 | 内置 | 超长上下文（1M tokens），原生音视频 |
-| **Qwen-VL 2.5** | Cross-Attention | ViT-bigG | 开源最强之一，支持动态分辨率 |
+| **Qwen-VL 2.5** | Cross-Attention | Custom ViT（自研） | 开源最强之一，支持动态分辨率 |
 | **LLaVA-OneVision** | Cross-Attention | SigLIP | 开源社区标杆，单图/多图/视频 |
 | **InternVL 2.5** | Cross-Attention | InternViT-6B | 6B 视觉编码器，细粒度理解强 |
 
@@ -852,8 +852,8 @@ contract_result = analyze_document(
 
 | 模型 | 参数量 | 多模态能力 | 目标设备 | 特点 |
 |------|--------|-----------|---------|------|
-| **Gemma 4** | 4B / 12B / 27B | 图像+文本 | 手机/笔记本 | Google 端侧旗舰，ShieldGemma 安全 |
-| **Phi-4-multimodal** | 5.6B | 图像+音频+文本 | 笔记本/边缘 | 微软，MoE routing 多模态 |
+| **Gemma 4** | E2B / E4B / 26B / 31B | 图像+文本 | 手机/笔记本 | Google 端侧旗舰，ShieldGemma 安全 |
+| **Phi-4-multimodal** | 5.6B | 图像+音频+文本 | 笔记本/边缘 | 微软，Mixture of LoRAs 多模态 |
 | **SmolVLM 2** | 256M / 500M / 2.2B | 图像+视频+文本 | 手机 | HuggingFace，超轻量 |
 | **MiniCPM-V** | 2B / 8B | 图像+文本 | 手机/平板 | 面壁智能，支持动态分辨率 |
 | **Qwen2.5-VL** | 3B / 7B | 图像+视频+文本 | 笔记本/边缘 | 阿里，3B 版本可端侧部署 |
@@ -942,7 +942,7 @@ let model = try VLMModel(configuration: config)
 │  模型              │ 量化  │ 首 token │ 吞吐  │
 │  SmolVLM-500M     │ INT4 │ 0.3s    │ 30t/s │
 │  MiniCPM-V 2B     │ INT4 │ 0.8s    │ 15t/s │
-│  Gemma-4 4B       │ INT4 │ 1.2s    │ 10t/s │
+│  Gemma-4 E4B      │ INT4 │ 1.2s    │ 10t/s │
 │  Qwen2.5-VL 3B    │ INT4 │ 1.0s    │ 12t/s │
 └──────────────────────────────────────────────┘
 
@@ -951,8 +951,8 @@ let model = try VLMModel(configuration: config)
 ┌──────────────────────────────────────────────┐
 │  模型              │ 量化  │ 首 token │ 吞吐  │
 │  Qwen2.5-VL 7B    │ INT4 │ 0.5s    │ 35t/s │
-│  Gemma-4 12B      │ INT4 │ 0.8s    │ 25t/s │
-│  Gemma-4 27B      │ INT8 │ 1.5s    │ 15t/s │
+│  Gemma-4 26B      │ INT4 │ 0.8s    │ 25t/s │
+│  Gemma-4 31B      │ INT8 │ 1.5s    │ 15t/s │
 │  InternVL2.5 8B   │ INT4 │ 0.6s    │ 30t/s │
 └──────────────────────────────────────────────┘
 ```

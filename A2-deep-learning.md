@@ -18,7 +18,7 @@
 ├── A2.4 训练技巧
 │   └── BatchNorm / Dropout / 学习率调度 / 数据增强
 ├── A2.5 从 Word2Vec 到 Transformer
-│   └── Word2Vec → Attention(2015) → ELMo → Transformer 的进化链
+│   └── Word2Vec → Attention(2014) → Transformer(2017) → ELMo(2018) 的进化链
 └── A2.6 深度学习框架
     └── PyTorch vs TensorFlow — 为什么 PyTorch 成为主流
 ```
@@ -183,9 +183,9 @@ Dropout ≈ 混沌工程。随机关掉部分节点，强迫网络学会冗余�
 |------|------|---------|------|
 | **1. 词袋/TF-IDF** | — | 统计词频 | 完全丢失语序和语义 |
 | **2. Word2Vec (2013)** | CBOW/Skip-gram | 词变成向量，语义关系可计算 | 一个词只有一个固定向量（"bank"不分银行/河岸） |
-| **3. Attention (2015)** | Bahdanau Attention | 让解码器动态聚焦编码器不同位置 | 仍依赖 RNN，无法完全并行 |
-| **4. ELMo (2018)** | 双向 LSTM | 上下文相关的词向量 | 仍是 RNN 架构，串行瓶颈 |
-| **5. Transformer (2017)** | Self-Attention | 完全并行 + 长距离依赖 | 计算量随序列长度平方增长 |
+| **3. Attention (2014)** | Bahdanau Attention | 让解码器动态聚焦编码器不同位置 | 仍依赖 RNN，无法完全并行 |
+| **4. Transformer (2017)** | Self-Attention | 完全并行 + 长距离依赖 | 计算量随序列长度平方增长 |
+| **5. ELMo (2018)** | 双向 LSTM | 上下文相关的词向量 | 仍是 RNN 架构，串行瓶颈 |
 | **5. BERT (2018)** | Transformer Encoder | 双向理解上下文 | 适合理解任务，不擅长生成 |
 | **6. GPT 系列 (2018→)** | Transformer Decoder | 强大的文本生成能力 | 自回归生成，推理慢 |
 
@@ -202,11 +202,11 @@ Word2Vec 训练目标：给定一个词，预测周围的词（Skip-gram），�
 ```
 Word2Vec: 静态 embedding（一个词一个向量，与上下文无关）
     ↓ 问题：多义词怎么办？
-Attention (2015, Bahdanau): 让解码器动态聚焦源序列不同位置，解决翻译中对齐问题
+Attention (2014, Bahdanau): 让解码器动态聚焦源序列不同位置，解决翻译中对齐问题
     ↓ 仍依赖 RNN，串行
-ELMo (2018): 用双向 LSTM 生成上下文相关向量，但仍是 RNN
-    ↓ 问题：怎么彻底并行 + 长距离？
 Transformer (2017): Self-Attention 完全替代 RNN，并行处理整个序列
+    ↓ 基于 Transformer 进一步探索上下文表示
+ELMo (2018): 用双向 LSTM 生成上下文相关向量，但仍是 RNN
 ```
 
 > **面试话术**：

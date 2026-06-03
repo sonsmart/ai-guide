@@ -36,7 +36,7 @@ One-shot（单样本）：给一个示例
   Prompt: "翻译示例：你好 → Hello
           翻译：今天天气真好 →"
 
-Few-shot（少样本）：给 2-5 个示例
+Few-shot（少样本）：给 2 个或更多示例（通常 2-5 个，上限取决于 context window 大小）
   Prompt: "示例1：你好 → Hello
           示例2：谢谢 → Thank you
           示例3：再见 → Goodbye
@@ -113,8 +113,8 @@ system_prompt = """你是一个数据分析专家。
 **设计框架——CRISPE：**
 
 ```
-C - Capacity（角色）：你是一个 [专业角色]
-R - Role（具体能力）：你擅长 [具体技能]
+C - Capacity and Role（角色与能力）：你是一个擅长 [具体技能] 的 [专业角色]
+R - Reference（背景参考）：相关背景资料是 [参考内容]
 I - Insight（背景信息）：当前场景是 [上下文]
 S - Statement（任务）：你需要 [做什么]
 P - Personality（风格）：回答要 [风格约束]

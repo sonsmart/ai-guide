@@ -761,7 +761,7 @@ export function Chat() {
 
 **模板回答：**
 
-"ReAct 是 Reason + Act 的缩写。Agent 在每一步先做推理（Thought：我需要做什么），然后执行动作（Action：调用某个工具），观察结果（Observation：工具返回了什么），然后进入下一轮推理。循环直到 Agent 认为可以给出最终回答。我用 LangGraph.js 实现了一个 ReAct Agent，注册了 4 个工具——web search、calculator、code interpreter、database query。关键的工程挑战有两个：一是防止无限循环，我设了最大步数限制和总 token 预算；二是错误恢复，如果某个工具调用失败，Agent 需要能理解错误信息并选择替代方案。"
+"ReAct 是 Reasoning + Acting 的缩写（来自论文标题'Synergizing Reasoning and Acting'）。Agent 在每一步先做推理（Thought：我需要做什么），然后执行动作（Action：调用某个工具），观察结果（Observation：工具返回了什么），然后进入下一轮推理。循环直到 Agent 认为可以给出最终回答。我用 LangGraph.js 实现了一个 ReAct Agent，注册了 4 个工具——web search、calculator、code interpreter、database query。关键的工程挑战有两个：一是防止无限循环，我设了最大步数限制和总 token 预算；二是错误恢复，如果某个工具调用失败，Agent 需要能理解错误信息并选择替代方案。"
 
 ---
 

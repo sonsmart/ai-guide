@@ -396,6 +396,8 @@ for size in chunk_sizes:
 
 **混合检索（Hybrid Search）= 向量检索 + 关键词检索，取长补短。**
 
+> 常见误解：向量检索的召回率/准确率比关键词检索"低"——实际上两者各有擅长场景，不是谁更好，而是互补。向量检索胜在语义理解，关键词检索胜在精确匹配专有名词、代码、ID 等。
+
 ```
 向量检索（Semantic Search）：
   ✅ 理解语义（"JS 框架" 能匹配 "React 是一个 JavaScript 库"）
@@ -659,6 +661,26 @@ rewritten = contextual_rewrite("怎么实现它？", history)
 
 **Rerank = 对初步检索的结果做二次精排，提升最终返回文档的质量。**
 
+> 常见误解：Rerank 只是"按向量相似度重新排序"——实际上向量检索已经做过相似度排序了，Rerank 做的是更精确的事：用 CrossEncoder 把"问题+chunk 实际内容"拼在一起整体理解，重新计算真实相关性。比向量检索的近似相似度准确得多，代价是更慢（无法预计算）。所以两阶段：向量检索粗召回一批候选，CrossEncoder 精排选 top-k。
+
+**两阶段的计算方式对比：**
+
+```
+向量检索（BiEncoder）：
+  问题 → 问题向量
+  每个 chunk 全文 → chunk 向量（离线预计算好的）
+  → 问题向量 vs 每个 chunk 向量 计算余弦相似度
+  → 一次性并行算完所有 chunk，极快
+
+CrossEncoder（Rerank）：
+  [问题全文 + chunk全文] 拼在一起 → 过一遍模型 → 相关性分数
+  → 每个 chunk 都要单独过一遍模型（一个一个来）
+  → 无法预计算，所以慢
+  → 但问题和 chunk 充分交互，打分更准确
+```
+
+"全文"和"一个一个"都是对的。
+
 **核心思路：粗召回 + 精排（两阶段检索）**
 
 ```
@@ -690,6 +712,37 @@ rewritten = contextual_rewrite("怎么实现它？", history)
   对 Top-100 精排，选出 Top-5
 ```
 
+**CrossEncoder 的计算过程（和模型推理的关系）：**
+
+CrossEncoder 本质是把"问题+chunk"拼成一段文本，走一遍完整的 Transformer 前向传播，取 [CLS] token 的输出向量接线性层打分：
+
+```
+输入："今天天气怎么样 [SEP] 北京今天晴天28度"
+↓ embedding
+↓ 第1层 Self-Attention + FFN（问题和chunk的所有token互相attention）
+↓ 第2层 Self-Attention + FFN
+↓ ... N层
+↓ 取 [CLS] token 的最终向量
+↓ × 线性层 → 相关性分数 0.87
+```
+
+[CLS] 不是输入的第一个有意义的词，而是一个人为加在最前面的特殊占位 token：
+
+```
+实际输入：[CLS] 苹果是什么颜色 [SEP] 经过研究表明苹果是红色
+位置：      0     1  2  3  4  5   6    7  8  9  10 ...
+```
+
+[CLS] 本身没有语义，存在的唯一目的是：经过多层 Attention 后，它的向量会 attend 整个序列所有 token，成为全文的"汇总向量"，然后接线性层打分。是 BERT 训练时专门设计的机制——[CLS] 作为"整段文本的摘要向量"用于分类/打分，而不是输入的某个具体词。
+
+| | 模型推理（生成答案） | CrossEncoder（打分） |
+|---|---|---|
+| 过程 | 前向传播 + 自回归循环生成 | 只有一次前向传播 |
+| 输出 | 逐 token 生成文本 | 一个标量分数 |
+| 慢在哪 | 要循环生成很多 token | 每对 (问题, chunk) 都要实时过一遍模型，无法预计算 |
+
+向量检索比 CrossEncoder 快得多的原因：向量检索根本不走 Transformer，只是两个向量做余弦相似度（纯矩阵点积），chunk 向量早已离线预计算好。
+
 **BiEncoder vs CrossEncoder 对比：**
 
 | 维度 | BiEncoder | CrossEncoder |
@@ -709,7 +762,7 @@ from sentence_transformers import CrossEncoder
 import cohere
 
 # === 方法一：使用 CrossEncoder 模型（本地部署） ===
-reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-12-v2")
+reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L12-v2")
 
 def rerank_with_cross_encoder(query: str, docs: list[str], top_n: int = 5):
     """用 CrossEncoder 对检索结果精排"""
@@ -1376,10 +1429,12 @@ Self-RAG：模型自己决定
 
 | Token | 含义 | 决策 |
 |-------|------|------|
-| `[Retrieve]` | 是否需要检索 | Yes → 检索 / No → 直接生成 |
-| `[IsRel]` | 检索结果是否相关 | Relevant → 使用 / Irrelevant → 丢弃 |
-| `[IsSup]` | 答案是否被 context 支持 | Supported → 输出 / No → 重新生成 |
-| `[IsUse]` | 答案是否有用 | Useful → 输出 / Not useful → 重新检索 |
+| `[Retrieval]`/`[No Retrieval]` | 是否需要检索 | [Retrieval] → 检索 / [No Retrieval] → 直接生成 |
+| `[Relevant]`/`[Irrelevant]` | 检索结果是否相关 | [Relevant] → 使用 / [Irrelevant] → 丢弃 |
+| `[Fully supported]`/`[Partially supported]`/`[No support]` | 答案是否被 context 支持 | [Fully supported] → 输出 / [No support] → 重新生成 |
+| `[Utility:1~5]` | 答案对用户的有用程度（1-5分） | 分数高 → 输出 / 分数低 → 重新检索 |
+
+> **注：** 以上为原论文（Asai et al., 2023）中使用的实际反思 token 名称。
 
 ### Q: 什么是 CRAG（Corrective RAG）？它如何纠错？
 
@@ -1508,6 +1563,22 @@ def rag_fusion(query: str, vectorstore, llm, k: int = 5) -> list:
 ---
 
 ## 5.8 RAG 生产问题
+
+### Q: 幻觉是怎么产生的？RAG 能完全解决吗？
+
+**幻觉产生的根本原因：** LLM 本质是预测下一个 token 的概率模型，当问题超出训练数据的知识边界时，模型会"合理地编造"一个听起来正确的答案，而不是说"我不知道"。
+
+**RAG 不能完全解决幻觉，原因有三：**
+
+1. **问题超出检索文档的知识边界** — 检索到的文档里根本没有答案，模型仍可能编造
+2. **模型忽略检索内容** — 模型可能无视文档内容，用自己的"记忆"回答
+3. **对文档内容做错误推理** — 文档内容是对的，但模型理解偏了
+
+**其他缓解幻觉的方法：**
+- 置信度标注：训练模型在不确定时说"我不知道"
+- 引用溯源：强制引用原文，无法引用就不回答
+- Self-RAG：模型自己判断是否需要检索，检索后再判断文档是否相关
+- 微调对齐：训练模型在知识边界外主动拒绝回答
 
 ### Q: RAG 系统如何做幻觉防护？
 

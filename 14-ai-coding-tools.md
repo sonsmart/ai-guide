@@ -59,11 +59,11 @@ AI 编程工具在 2024-2026 年经历了爆发式发展，从最初的 "代码�
 | **Cursor** | AI-Native IDE | 多模型（可切换） | $20-40 | Fork VS Code，Composer 多文件编辑，Tab 补全 |
 | **Claude Code** | CLI Agent | Claude Sonnet/Opus | 按 token 计费 | 终端原生，深度 git 集成，agentic workflow |
 | **Windsurf** | AI-Native IDE | Cascade（自研） | $10-30 | Codeium 出品，Cascade 多步推理 |
-| **Devin** | 自主 Agent | 自研 | $500+ | 全自主开发，有自己的 VM 和浏览器 |
+| **Devin** | 自主 Agent | 自研 | $20-200/月（以官网为准） | 全自主开发，有自己的 VM 和浏览器 |
 | **OpenHands** | 自主 Agent | 开源 / 多模型 | 免费 (OSS) | 开源 Devin 替代品，SWE-bench 高分 |
 | **Amazon Q Developer** | 代码补全 + 转换 | Amazon 自研 | $0-19 | AWS 生态集成，Java 版本升级特色功能 |
 | **Aider** | CLI Agent | 多模型 | 免费 (OSS) | 开源，支持 30+ 模型，git 友好 |
-| **Tabnine** | 代码补全 | 自研 / 本地 | $12-39 | 可本地部署，隐私优先 |
+| **Tabnine** | 代码补全 | 自研 / 本地 | $39-59 | 可本地部署，隐私优先 |
 
 **市场趋势（2026 观察）：**
 
@@ -119,7 +119,7 @@ GitHub Copilot                 Cursor                      Claude Code
 | **工具调用** | 有限 | 有限 | 完整（bash/文件/搜索） |
 | **自定义规则** | .github/copilot-instructions.md | .cursorrules | CLAUDE.md |
 | **底层模型** | GPT-4o / Claude（受限） | GPT-4o / Claude / Gemini（可切换） | Claude Sonnet / Opus |
-| **价格** | $10 个人 / $39 企业 | $20 Pro / $40 Business | 按 token 计费（~$20-100/月） |
+| **价格** | $10(Pro) / $39(Pro+)，Enterprise需咨询报价 | $20 Pro / $40 Business | 按 token 计费（~$20-100/月） |
 | **离线 / 本地** | 否 | 否 | 否（但可配本地模型） |
 
 **适用场景推荐：**
@@ -254,8 +254,8 @@ SWE-bench 评测流程：
 | Agent / System | Resolve Rate |
 |---------------|-------------|
 | Claude Code (Opus) | ~72% |
-| OpenHands + Claude 3.5 | ~53% |
-| Devin | ~49% |
+| OpenHands + Claude 3.5 | ~53%（数据持续更新，以swebench.com官方排行榜为准） |
+| Devin | ~49%（数据持续更新，以swebench.com官方排行榜为准） |
 | AutoCodeRover | ~38% |
 | SWE-Agent + GPT-4 | ~33% |
 

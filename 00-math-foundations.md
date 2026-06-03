@@ -78,7 +78,7 @@ dotProduct([1, 2, 3], [4, 5, 6]) = 1×4 + 2×5 + 3×6 = 32
 // 2. Attention score → Q 和 K 的点积，越大说明越"相关"
 ```
 
-**连接到 Transformer：** Attention 机制的核心公式 `Attention(Q, K, V) = softmax(QK^T / √d) V` 全是矩阵运算——Q、K、V 是矩阵，`QK^T` 是矩阵乘法，softmax 逐行应用，最终再乘 V。理解了"矩阵乘法 = 批量点积"，就理解了 Attention 在计算什么。
+**连接到 Transformer：** Attention 机制的核心公式 `Attention(Q, K, V) = softmax(QK^T / √d_k) V` 全是矩阵运算——Q、K、V 是矩阵，`QK^T` 是矩阵乘法，softmax 逐行应用，最终再乘 V。理解了"矩阵乘法 = 批量点积"，就理解了 Attention 在计算什么。（注：d_k 是 key/query 向量的维度，除以 √d_k 是为了防止点积值过大导致 softmax 进入梯度饱和区）
 
 **面试话术：**
 > "在 AI 里，向量是数据的表示方式——文字、图片最终都变成高维向量。矩阵乘法是核心计算——神经网络每一层都是矩阵变换。Attention 机制本质上就是用点积来计算 query 和 key 的相似度，然后加权聚合 value。这就是为什么 GPU 对 AI 很重要——GPU 就是并行矩阵计算的硬件。"

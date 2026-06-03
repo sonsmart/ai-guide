@@ -491,16 +491,16 @@ npx promptfoo@latest redteam report  # 生成报告
 
 | 排名 | 风险 | 说明 | 防御 |
 |------|------|------|------|
-| 1 | **Prompt Injection** | 用户注入恶意指令 | 输入过滤 + 分隔符隔离 |
-| 2 | **Insecure Output** | LLM 输出含恶意代码（XSS/SQL） | 输出转义 + 校验 |
-| 3 | **Training Data Poisoning** | 训练数据被污染 | 数据来源审计 |
-| 4 | **Denial of Service** | 超长输入/批量请求耗尽资源 | 限流 + Token 上限 |
-| 5 | **Supply Chain** | 依赖的模型/插件有漏洞 | 依赖审计 + 沙箱 |
-| 6 | **Sensitive Info Disclosure** | LLM 泄露训练数据中的隐私 | PII 过滤 + 输出审核 |
-| 7 | **Insecure Plugin** | 插件/工具权限过大 | 最小权限 + 沙箱 |
-| 8 | **Excessive Agency** | Agent 自主权过大，执行危险操作 | HITL + 风险分级 |
-| 9 | **Overreliance** | 过度依赖 AI 输出不加验证 | 人工审核 + 置信度标注 |
-| 10 | **Model Theft** | 模型被窃取或逆向 | API 限流 + 水印 |
+| 1 | **Prompt Injection** | 用户或外部数据注入恶意指令，劫持模型行为 | 输入过滤 + 分隔符隔离 + LLM Firewall |
+| 2 | **Sensitive Information Disclosure**（敏感信息泄露） | LLM 泄露训练数据、系统 prompt 或用户隐私 | PII 过滤 + 输出审核 + 访问控制 |
+| 3 | **Supply Chain**（供应链） | 依赖的模型、插件、数据集或第三方组件含漏洞 | 依赖审计 + 沙箱 + 来源验证 |
+| 4 | **Data and Model Poisoning**（数据和模型投毒） | 训练数据或微调数据被污染，影响模型行为 | 数据来源审计 + 完整性校验 |
+| 5 | **Improper Output Handling**（不当输出处理） | LLM 输出未经验证直接使用，导致 XSS/SQL 注入等 | 输出转义 + 格式校验 + 沙箱执行 |
+| 6 | **Excessive Agency**（过度自主） | Agent 自主权过大，执行危险或超出预期的操作 | HITL + 最小权限 + 风险分级审批 |
+| 7 | **System Prompt Leakage**（系统提示泄露） | 系统 prompt 中的敏感配置、业务逻辑被泄露 | Canary Token + 输出监控 + Prompt 加固 |
+| 8 | **Vector and Embedding Weaknesses**（向量和嵌入弱点） | 向量数据库或嵌入模型存在安全漏洞，如记忆投毒 | 向量数据访问控制 + 输入净化 + 审计 |
+| 9 | **Misinformation**（错误信息） | LLM 生成虚假或误导性内容，过度自信不说"不知道" | RAG 事实核查 + 置信度标注 + 人工审核 |
+| 10 | **Unbounded Consumption**（无限制消耗） | 超长输入/批量请求耗尽计算资源，导致 DoS 或高额费用 | 限流 + Token 上限 + 速率控制 |
 
 **Agent 特有的新威胁（基于 OWASP LLM Top 10 延伸，非 OWASP 正式发布文档）：**
 

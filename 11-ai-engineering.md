@@ -484,7 +484,7 @@ result = await app.ainvoke({
 |------|------|------|-----|
 | **定位** | AI 应用开发平台 | AI Bot 构建平台 | 通用工作流自动化 |
 | **开源** | ✅ 开源（可私有部署） | ❌ 闭源 | ✅ 开源 |
-| **核心能力** | RAG + Agent + Workflow | Bot + Plugin + 发布渠道 | 400+ 集成 + AI 节点 |
+| **核心能力** | RAG + Agent + Workflow | Bot + Plugin + 发布渠道 | 500+集成（社区含1800+） + AI 节点 |
 | **模型支持** | OpenAI / Claude / 本地模型 | 主要字节系（豆包）+ OpenAI | 通过 HTTP 接入任意模型 |
 | **RAG** | ⭐⭐⭐⭐⭐ 内置完整 RAG Pipeline | ⭐⭐⭐ 基础知识库 | ⭐⭐ 需自己拼 |
 | **工作流** | ⭐⭐⭐⭐ 可视化编排 | ⭐⭐⭐ 简单流程 | ⭐⭐⭐⭐⭐ 最强工作流 |
@@ -583,7 +583,9 @@ results = asyncio.run(batch_process(prompts))
 | `asyncio.wait_for(coro, timeout)` | 超时控制 | `Promise.race([p, timeout])` |
 | `asyncio.Semaphore(n)` | 限制并发数 | `p-limit(n)` |
 | `asyncio.Queue()` | 异步队列 | 无直接等价（可用 Channel） |
-| `asyncio.TaskGroup()` | 任务组（Python 3.11+） | `Promise.allSettled()` |
+| `asyncio.TaskGroup()` | 任务组（Python 3.11+） | `Promise.all()（失败时取消其余任务，比Promise.all更严格）` |
+
+> **注：** `Promise.allSettled()` 的 Python 对应是 `asyncio.gather(return_exceptions=True)`
 
 **面试话术：**
 

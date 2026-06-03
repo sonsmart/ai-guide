@@ -63,6 +63,61 @@
 - Word2Vec vs ELMo 核心区别
 - Attention(2015) 在进化链中的位置
 
+### RAG 进阶
+- Lost in the Middle 是什么，解决方法有哪些（5种）
+
+### 推理参数
+- 灾难性遗忘是什么，对应用开发的影响
+- 余弦相似度 vs 欧几里得距离的区别
+
+### Prompt 安全
+- Prompt 注入攻击是什么，举例
+
+### 工具调用
+- Function Calling 是什么，和 MCP 的区别
+
+### System Prompt / Prompt 设计
+- System Prompt vs 用户 prompt 的区别
+
+### RAG 进阶（续）
+- 混合检索是什么，为什么不只用向量检索
+- HyDE 是什么，解决了什么问题
+
+### 微调
+- LoRA 是什么，为什么比全量微调更常用
+
+### MCP 架构
+- MCP 三层架构：Client / Server / Transport 各负责什么
+
+### 新一轮
+- Prompt 注入攻击是什么，举例
+- 灾难性遗忘是什么，微调时怎么触发
+- Top-P 是什么，和 Temperature 的区别
+- GraphRAG 解决了传统 RAG 的什么问题
+- Multi-Agent 是什么，什么场景需要用
+
+### 推理优化
+- Speculative Decoding 是什么，解决什么瓶颈
+
+### 微调
+- 灾难性遗忘是什么，怎么触发怎么避免
+
+### RAG 进阶（续2）
+- Agentic RAG vs 普通 RAG
+
+### Prompt Engineering 进阶
+- Context Engineering vs Prompt Engineering
+
+### Agent 深度
+- Reflexion 反思机制是什么，解决 ReAct 的什么问题
+
+### 本轮新题
+- Speculative Decoding 是什么，解决什么瓶颈
+- Agentic RAG vs 普通 RAG 本质区别
+- RLHF 三阶段各解决什么问题
+- LLM 六大局限性
+- 向量数据库选型维度
+
 ## 出题规则
 
 1. 每次出题前检查上面列表，不出重复题

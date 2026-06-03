@@ -252,7 +252,7 @@ def multi_head_attention(X, num_heads=8):
 |------|-----------|--------------|------|----------|
 | **MHA** | 每个头独立 K/V | 大（32 组） | 最好 | GPT-3 |
 | **MQA** | 所有头共享 1 组 K/V | 最小（1 组） | 有损失 | PaLM |
-| **GQA** | 分组共享（如 8 组） | 中等（8 组） | 接近 MHA | LLaMA 2/3, Gemini |
+| **GQA** | 分组共享（如 8 组） | 中等（8 组） | 接近 MHA | LLaMA 2 70B、LLaMA 3系列、Gemini（注：LLaMA 2 仅 70B 使用 GQA，7B/13B 使用 MHA） |
 
 ```
 MHA（Multi-Head Attention）：每个头都有独立的 Q/K/V
@@ -429,11 +429,12 @@ GPT（单向）：
 2023  GPT-4                       ← 多模态（图+文）
 2023  LLaMA 1/2（Meta）           ← 开源 LLM 时代开启
   ↓
-2024  Mixture of Experts（MoE）    ← Mixtral, DeepSeek-V2
+2024  Mixture of Experts（MoE）    ← Mixtral（Mixtral于2023年12月首发）, DeepSeek-V2
       → 激活参数 << 总参数，推理更高效
   ↓
-2025  DeepSeek-V3/R1              ← MoE + 长思考链（CoT）
-2025  LLaMA 3.1/4                 ← 开源追赶闭源
+2024末/2025  DeepSeek-V3（2024年12月）/ R1（2025年1月）← MoE + 长思考链（CoT）
+2024  LLaMA 3.1（2024年7月）
+2025  LLaMA 4（Scout/Maverick，2025年4月）         ← 开源追赶闭源
   ↓
 2026  Claude 4, GPT-5             ← 更强推理 + 更长上下文 + Agent 原生能力
 ```

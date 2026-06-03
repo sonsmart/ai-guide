@@ -182,9 +182,9 @@ KV Cache 内存 = 2 × n_layers × n_heads × head_dim × seq_len × batch_size 
 
 | 模型 | 权重 (FP16) | KV Cache (seq=4K, B=1) | 10 并发 KV |
 |------|-----------|----------------------|-----------|
-| LLaMA-3.1-8B | 16 GB | ~1.0 GB | ~10 GB |
+| LLaMA-3.1-8B | 16 GB | ~0.5 GB（GQA） | ~5 GB |
 | LLaMA-3.1-70B | 140 GB | ~1.25 GB（GQA） | ~12.5 GB |
-| LLaMA-3.1-405B | 810 GB | ~64 GB | ~640 GB |
+| LLaMA-3.1-405B | 810 GB | ~2 GB（GQA） | ~20 GB |
 
 **优化 KV Cache 的方法：**
 
@@ -241,6 +241,36 @@ Decode 第三步：
 
 **关键点：** "是红色"不是一次性生成的，是逐 token 预测出来的。每步只需计算新 token 自己的 Q/K/V，历史 token 的 K/V 从 Cache 里直接取，不重复计算。
 
+**CrossEncoder vs 模型推理：取哪个 token 的输出向量**
+
+两者都是前向传播，区别在于取哪个 token 的最终向量、拿去做什么：
+
+```
+CrossEncoder（打分）：
+  输入：[CLS] 问题 [SEP] chunk全文
+  取：第0位的 [CLS] token 最终向量 → × 线性层 → 相关性分数
+  [CLS] 是专门设计的占位 token，经过层层 Attention 汇聚了全文信息
+
+模型推理（生成下一个词）：
+  输入：苹果是什么颜色（用户 prompt）
+  取：最后一个 token "色" 的最终向量 → × 词表矩阵 → 采样 → "是"
+  "是" 加入序列，下一轮输入变成"苹果是什么颜色是"，继续循环
+```
+
+**RAG 场景下的推理输入：**
+
+RAG 里 chunk 是塞进 prompt 的上下文，整段话一起作为输入：
+
+```
+实际输入（整体）：
+  "参考资料：经过研究表明，苹果是红色\n问题：苹果是什么颜色"
+
+最后一个 token 是问题末尾的"色"
+基于"色"预测下一个 token → "是"（回答开始）
+```
+
+chunk 不是独立的推理序列，它是 prompt 的组成部分。
+
 ### Q: 每一层 Transformer 里 Attention + FFN 具体做什么？每层的 K/V 都不一样吗？
 
 **每一层做两件事：**
@@ -267,7 +297,7 @@ KV Cache 结构：
 
 这也是公式里有 n_layers 这一项的原因——每层都要存一份 K/V。
 
-> **面试话术：** "KV Cache 是 Transformer 推理的核心优化，通过缓存历史 token 的 Key-Value 避免重复计算，把时间复杂度从 O(n^2) 降到 O(n)。但代价是显存占用，一个 70B 模型在 4K 序列长度下单请求 KV Cache 就有约 10GB。在高并发场景下 KV Cache 往往比模型权重占更多显存，所以 GQA、PagedAttention、KV 量化等优化至关重要。"
+> **面试话术：** "KV Cache 是 Transformer 推理的核心优化，通过缓存历史 token 的 Key-Value 避免重复计算，把时间复杂度从 O(n^2) 降到 O(n)。但代价是显存占用，一个 70B 模型在 4K 序列长度下单请求 KV Cache 就有约 1.25 GB（GQA）；若按完整MHA计算则约10GB，LLaMA-3.1采用GQA后大幅降低。在高并发场景下 KV Cache 往往比模型权重占更多显存，所以 GQA、PagedAttention、KV 量化等优化至关重要。"
 
 ---
 
@@ -628,6 +658,8 @@ Continuous Batching = Promise.race() + 流式处理
 
 **Speculative Decoding（投机解码）的核心思想：用一个小模型快速"猜测"多个 token，再用大模型一次性验证，从而把多步串行解码变成批量并行验证。**
 
+> **质量说明：** 输出质量与单独用大模型完全一致，不是"相对不会下降太多"——通过 rejection sampling 数学上保证输出分布等价于大模型独立生成。接受的 token 就是大模型会生成的，拒绝的从大模型结果替换。加速比取决于小模型的接受率，简单任务可达 2-3x。
+
 ```
 传统自回归解码（串行，慢）：
 
@@ -931,7 +963,7 @@ MLA (Multi-Head Latent Attention) vs 标准 MHA：
     └───────────────────────────────┘
 
   KV Cache 压缩效果：
-    标准 GQA (128 KV heads): ~10 GB / 4K seq / 70B model
+    标准 MHA (128 KV heads): ~10 GB / 4K seq / 70B model
     MLA (compressed):        ~1 GB / 4K seq / 同等模型  🔥
     压缩约 10 倍！
 ```
