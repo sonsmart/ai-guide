@@ -439,6 +439,8 @@ judge_prompt = """评估以下回答的质量（1-5 分）：
 
 **Context Engineering（上下文工程）= 系统性地构建和管理 LLM 输入的全部上下文，不仅仅是 prompt。**
 
+> **和 Prompt Engineering 的关系：** Prompt Engineering 是 Context Engineering 的子集——前者只关注怎么写 prompt 文本本身，后者关注整个 context window 里放什么、怎么组织，包括 System Prompt 设计、RAG 检索结果排列、对话历史压缩、工具返回结果格式化等。
+
 ```
 Prompt Engineering（狭义）：
   只关注怎么写 prompt 文本本身

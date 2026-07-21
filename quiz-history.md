@@ -118,6 +118,27 @@
 - LLM 六大局限性
 - 向量数据库选型维度
 
+### 本轮新题2
+- Context Engineering vs Prompt Engineering
+- Reflexion 反思机制，解决 ReAct 什么问题
+- RAGAS 四大核心指标
+- Copilot vs Agent 范式区别
+- 灾难性遗忘怎么触发怎么避免
+
+### 本轮新题3
+- RAGAS 四大核心指标
+- MCP Tools vs Resources vs Prompts 区别
+- 模型量化 INT8 vs INT4 取舍
+- Multi-Query Retrieval 是什么
+- Agent 四种记忆类型
+
+### 本轮新题4
+- RAG 分块策略：固定分块、语义分块、Late Chunking 的区别
+- Rerank：BiEncoder 粗召回和 CrossEncoder 精排的区别
+- PagedAttention 如何解决 KV Cache 内存碎片化
+- Agent 生产环境如何防止死循环
+- AI 流式输出场景下 SSE 和 WebSocket 如何选择
+
 ## 出题规则
 
 1. 每次出题前检查上面列表，不出重复题
