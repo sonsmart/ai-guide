@@ -139,6 +139,13 @@
 - Agent 生产环境如何防止死循环
 - AI 流式输出场景下 SSE 和 WebSocket 如何选择
 
+### 本轮新题5
+- HNSW、IVF、PQ、LSH 这些向量索引算法有什么区别
+- Prompt Caching 是什么，为什么能降低 LLM API 成本
+- DPO 如何简化 RLHF，为什么不需要单独训练 Reward Model
+- LangGraph 和 LangChain Chain 有什么区别，为什么 Agent 更适合用状态机
+- Defensible RAG 是什么，它需要做哪些关键设计决策
+
 ## 出题规则
 
 1. 每次出题前检查上面列表，不出重复题
